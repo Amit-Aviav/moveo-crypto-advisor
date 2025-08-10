@@ -1,8 +1,11 @@
+// backend/src/index.ts
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { prisma } from './utils/prisma'; 
 import authRoutes from "./routes/auth";
+import preferencesRoutes from './routes/preferences';
+
 
 
 // Load environment variables
@@ -17,7 +20,8 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/preferences', preferencesRoutes);
 
 // Health check
 app.get('/health', (_req, res) => {
@@ -49,8 +53,16 @@ app.get('/', (_req, res) => {
   });
 });
 
-// Auth routes
-app.use('/api/auth', authRoutes);
+
+
+
+
+
+// quick canary route at the exact path family
+app.get('/api/preferences/ping', (_req, res) => res.json({ ok: true }));
+
+
+
 
 // Start server
 app.listen(PORT, () => {
