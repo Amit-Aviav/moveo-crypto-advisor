@@ -1,0 +1,37 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  name        String?
+  password    String
+  createdAt   DateTime     @default(now())
+  preferences Preference?
+  votes       Vote[]
+}
+
+model Preference {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  assets       String[] // e.g. ["BTC","ETH"]
+  investorType String
+  contentTypes String[] // e.g. ["News","Charts","Social","Fun"]
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "news" | "price" | "insight" | "meme"
+  itemId    String   // external id or URL
+  value     Int      // +1 or -1
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
