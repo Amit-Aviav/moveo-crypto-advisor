@@ -3,11 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { prisma } from './utils/prisma'; 
 
+// Load environment variables
 dotenv.config();
 
+// Express app
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -32,6 +35,16 @@ app.get('/db-test', async (_req, res) => {
   }
 });
 
+// Root endpoint
+app.get('/', (_req, res) => {
+  res.json({
+    app: 'Moveo Crypto Advisor API',
+    status: 'ok',
+    routes: ['/health', '/db-test', 'POST /echo']
+  });
+});
+
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
