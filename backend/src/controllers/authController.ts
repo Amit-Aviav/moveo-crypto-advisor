@@ -21,7 +21,7 @@ export async function signup(req: Request, res: Response) {
 
     const hash = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await prisma.user.create({
-      data: { email, name: name ?? null, passwordHash: hash }
+      data: { email, name: name ?? null, password: hash }
     });
 
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET as string, { expiresIn: '7d' });
@@ -46,7 +46,7 @@ export async function login(req: Request, res: Response) {
       return;
     }
 
-    const ok = await bcrypt.compare(password, user.passwordHash);
+    const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
