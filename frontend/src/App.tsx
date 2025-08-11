@@ -1,76 +1,81 @@
-import { useState } from "react";
-import { login, getPrefs, savePrefs } from "./api";
+import { useEffect, useState } from "react";
+import { login, register } from "./api";
+import OnboardingWizard from "./components/OnboardingWizard"; // <-- use wizard
 
 export default function App() {
   const [email, setEmail] = useState("newtesttt@example.com");
   const [password, setPassword] = useState("Passw0rd!");
   const [token, setToken] = useState("");
-  const [prefs, setPrefs] = useState<any>(null);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const t = localStorage.getItem("token");
+    if (t) setToken(t);
+    console.log("API =", import.meta.env.VITE_API_URL);
+  }, []);
 
   const doLogin = async () => {
     setBusy(true); setMsg("");
     try {
       const { token } = await login(email, password);
       setToken(token);
+      localStorage.setItem("token", token);
       setMsg("Logged in ✅");
-    } catch (e: any) { setMsg(e.message || "Login failed"); }
-    finally { setBusy(false); }
+    } catch (e: any) {
+      console.error(e);
+      setMsg(e.message || "Login failed");
+    } finally { setBusy(false); }
   };
 
-  const fetchPrefs = async () => {
+  const doRegister = async () => {
     setBusy(true); setMsg("");
     try {
-      const res = await getPrefs(token);
-      setPrefs(res.preferences ?? null);
-      setMsg("Fetched preferences ✅");
-    } catch (e: any) { setMsg(e.message || "Fetch failed"); }
-    finally { setBusy(false); }
+      await register("Test", email, password);
+      await doLogin();
+    } catch (e: any) {
+      console.error(e);
+      setMsg(e.message || "Register failed");
+    } finally { setBusy(false); }
   };
 
-  const saveSample = async () => {
-    setBusy(true); setMsg("");
-    try {
-      await savePrefs(token, {
-        investorType: "beginner",
-        assets: ["BTC", "ETH"],
-        contentTypes: ["news", "signals"],
-      });
-      await fetchPrefs();
-      setMsg("Saved ✅");
-    } catch (e: any) { setMsg(e.message || "Save failed"); }
-    finally { setBusy(false); }
+  const logout = () => {
+    localStorage.removeItem("token");
+    setToken("");
+    setMsg("Logged out");
   };
 
   return (
-    <div style={{ maxWidth: 520, margin: "40px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>Onboarding Preferences (Demo)</h1>
+    <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "system-ui, sans-serif" }}>
+      <h1>Onboarding Preferences</h1>
 
-      <label>Email<br />
-        <input value={email} onChange={(e)=>setEmail(e.target.value)} style={{width:"100%"}} />
-      </label>
-      <br /><br />
-      <label>Password<br />
-        <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} style={{width:"100%"}} />
-      </label>
-      <br /><br />
-
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={doLogin} disabled={busy}>Login</button>
-        <button onClick={fetchPrefs} disabled={!token || busy}>Get Prefs</button>
-        <button onClick={saveSample} disabled={!token || busy}>Save Sample</button>
-      </div>
-
-      <p>{msg}</p>
-
-      <pre style={{ background:"#111", color:"#0f0", padding:12, borderRadius:8 }}>
-        token: {token ? token.slice(0,28) + "…" : "(none)"}
-      </pre>
-
-      <pre style={{ background:"#f6f6f6", padding:12, borderRadius:8, minHeight:120 }}>
-        {JSON.stringify(prefs, null, 2)}
-      </pre>
+      {!token ? (
+        <>
+          <label>Email<br/>
+            <input value={email} onChange={e=>setEmail(e.target.value)} style={{width:"100%"}} />
+          </label>
+          <br/><br/>
+          <label>Password<br/>
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} style={{width:"100%"}} />
+          </label>
+          <br/><br/>
+          <div style={{ display:"flex", gap:8 }}>
+            <button onClick={doLogin} disabled={busy}>Login</button>
+            <button onClick={doRegister} disabled={busy}>Register</button>
+          </div>
+          <p>{msg}</p>
+        </>
+      ) : (
+        <>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+            <code>token: {token.slice(0,28)}…</code>
+            <button onClick={logout}>Logout</button>
+          </div>
+          <hr/>
+          <OnboardingWizard token={token} /> {/* <-- show wizard */}
+          <p>{msg}</p>
+        </>
+      )}
     </div>
   );
 }
