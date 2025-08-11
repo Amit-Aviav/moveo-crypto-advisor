@@ -4,7 +4,7 @@ A personalized crypto investor dashboard. The app onboards the user with a short
 
 ## Live URLs
 - **Backend (Railway):** https://moveo-crypto-advisor-production.up.railway.app/
-- **Frontend (Netlify/Vercel):** https://YOUR-FRONTEND.app
+- **Frontend (Netlify/Vercel):** https://moveo-crypto-advisor-aqw9i4uqd-amit-aviavs-projects.vercel.app/
 
 ## Features
 - **Auth:** email/password register & login (JWT)
