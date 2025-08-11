@@ -20,9 +20,32 @@ A personalized crypto investor dashboard. The app onboards the user with a short
   - **Fun Crypto Meme** (memegen.link image)
 - **Feedback:** 👍/👎 votes stored per user for each item
 
+## Usage
+## Onboarding flow & editing preferences
+- After login, the app checks `/api/preferences/me`.
+- If preferences are incomplete (no investor type, no assets, or no content types), the **Onboarding Wizard** opens automatically.
+- When you click **Save & Finish**, the app switches to the **Daily Dashboard**.
+- You can reopen the wizard anytime from the dashboard via **Edit preferences** (top-right).
+
+## Voting
+Each dashboard item supports simple up/down voting:
+- **Prices** → vote per symbol (e.g., BTC, ETH)
+- **News** → vote per story
+- **Insight** and **Meme** → vote per daily item
+
+Votes are stored per user in the DB (`Vote` model). Totals endpoint exists
+(`/api/votes/summary`) but the UI currently hides counts to keep the flow simple.
+
 ## Tech
 - **Frontend:** React + Vite (TypeScript)
 - **Backend:** Node.js + Express (TypeScript)
 - **DB:** PostgreSQL (Prisma ORM)
 - **Deploy:** Railway (backend), Netlify/Vercel (frontend)
+
+## Bonus / Future work
+- **LLM Insight**: replace rule-based insight with a free LLM (OpenRouter / HF Inference) using user assets + content types as context.
+- **Vote totals & highlighting**: show ↑ / ↓ counts and tint my current vote; add optimistic updates.
+- **News sources**: plug real CryptoPanic (set `CRYPTOPANIC_TOKEN`) and add filters by selected assets.
+- **Charts**: if user chose “Charts”, embed simple sparkline or link to TradingView per asset.
+- **Error tolerance**: graceful backoffs when third-party APIs rate-limit.
 
