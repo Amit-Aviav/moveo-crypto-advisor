@@ -6,14 +6,15 @@ import Dashboard from "./components/Dashboard";
 export default function App() {
   const [email, setEmail] = useState("newtesttt@example.com");
   const [password, setPassword] = useState("Passw0rd!");
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState<string | null>(null);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // onboarding gating
+  // wizard gating
   const [checking, setChecking] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
 
+  // load token on mount
   useEffect(() => {
     const t = localStorage.getItem("token");
     if (t) setToken(t);
@@ -43,11 +44,12 @@ export default function App() {
 
   const logout = () => {
     localStorage.removeItem("token");
-    setToken("");
+    setToken(null);
+    setShowWizard(false);
     setMsg("Logged out");
   };
 
-  // decide wizard vs dashboard
+  // check if prefs are complete
   const prefsComplete = (p: any | null) =>
     !!p &&
     !!p.investorType &&
@@ -70,7 +72,7 @@ export default function App() {
   }, [token]);
 
   return (
-    <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "system-ui, sans-serif" }}>
+    <div style={{ maxWidth: 960, margin: "40px auto", padding: "0 12px", fontFamily: "system-ui, sans-serif" }}>
       <h1>Onboarding Preferences</h1>
 
       {!token ? (
@@ -91,8 +93,8 @@ export default function App() {
         </>
       ) : (
         <>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            <code>token: {token.slice(0,28)}…</code>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom: 8 }}>
+            {import.meta.env.DEV && <code>token: {token.slice(0,28)}…</code>}
             <button onClick={logout}>Logout</button>
           </div>
           <hr/>
@@ -100,9 +102,17 @@ export default function App() {
           {checking ? (
             <p>Loading your preferences…</p>
           ) : showWizard ? (
-            <OnboardingWizard token={token} onComplete={() => setShowWizard(false)} />
+            <OnboardingWizard
+              token={token}
+              onComplete={() => setShowWizard(false)}
+            />
           ) : (
-            <Dashboard token={token} />
+            <>
+              <div style={{ display:"flex", justifyContent:"flex-end", marginBottom: 12 }}>
+                <button onClick={() => setShowWizard(true)}>Edit preferences</button>
+              </div>
+              <Dashboard token={token} />
+            </>
           )}
 
           <p>{msg}</p>
