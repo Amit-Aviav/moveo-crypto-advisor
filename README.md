@@ -21,7 +21,7 @@ A personalized crypto investor dashboard. The app onboards the user with a short
 - **Feedback:** 👍/👎 votes stored per user for each item
 
 ## Usage
-Onboarding flow & editing preferences
+Onboarding flow & editing preferences:
 - After login, the app checks `/api/preferences/me`.
 - If preferences are incomplete (no investor type, no assets, or no content types), the **Onboarding Wizard** opens automatically.
 - When you click **Save & Finish**, the app switches to the **Daily Dashboard**.
