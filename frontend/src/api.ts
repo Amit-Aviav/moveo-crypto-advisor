@@ -50,6 +50,12 @@ export async function getPrefs(token: string) {
   );
 }
 
+export async function getDashboard(token: string) {
+    return request<{ ok: boolean; sections: any }>("/api/dashboard", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+  
 export async function savePrefs(
   token: string,
   body: { investorType: string; assets: string[]; contentTypes: string[] }

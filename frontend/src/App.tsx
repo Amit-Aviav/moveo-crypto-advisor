@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { login, register } from "./api";
-import OnboardingWizard from "./components/OnboardingWizard"; // <-- use wizard
+import { login, register, getPrefs } from "./api";
+import OnboardingWizard from "./components/OnboardingWizard";
+import Dashboard from "./components/Dashboard";
 
 export default function App() {
   const [email, setEmail] = useState("newtesttt@example.com");
@@ -9,21 +10,23 @@ export default function App() {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // onboarding gating
+  const [checking, setChecking] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
+
   useEffect(() => {
     const t = localStorage.getItem("token");
     if (t) setToken(t);
-    console.log("API =", import.meta.env.VITE_API_URL);
   }, []);
 
   const doLogin = async () => {
     setBusy(true); setMsg("");
     try {
-      const { token } = await login(email, password);
-      setToken(token);
-      localStorage.setItem("token", token);
+      const r = await login(email, password);
+      setToken(r.token);
+      localStorage.setItem("token", r.token);
       setMsg("Logged in ✅");
     } catch (e: any) {
-      console.error(e);
       setMsg(e.message || "Login failed");
     } finally { setBusy(false); }
   };
@@ -34,7 +37,6 @@ export default function App() {
       await register("Test", email, password);
       await doLogin();
     } catch (e: any) {
-      console.error(e);
       setMsg(e.message || "Register failed");
     } finally { setBusy(false); }
   };
@@ -45,6 +47,28 @@ export default function App() {
     setMsg("Logged out");
   };
 
+  // decide wizard vs dashboard
+  const prefsComplete = (p: any | null) =>
+    !!p &&
+    !!p.investorType &&
+    Array.isArray(p.assets) && p.assets.length > 0 &&
+    Array.isArray(p.contentTypes) && p.contentTypes.length > 0;
+
+  useEffect(() => {
+    if (!token) return;
+    setChecking(true);
+    (async () => {
+      try {
+        const res = await getPrefs(token);
+        setShowWizard(!prefsComplete(res?.preferences ?? null));
+      } catch {
+        setShowWizard(true);
+      } finally {
+        setChecking(false);
+      }
+    })();
+  }, [token]);
+
   return (
     <div style={{ maxWidth: 640, margin: "40px auto", fontFamily: "system-ui, sans-serif" }}>
       <h1>Onboarding Preferences</h1>
@@ -52,11 +76,11 @@ export default function App() {
       {!token ? (
         <>
           <label>Email<br/>
-            <input value={email} onChange={e=>setEmail(e.target.value)} style={{width:"100%"}} />
+            <input value={email} onChange={e=>setEmail(e.target.value)} style={{ width: "100%" }} />
           </label>
           <br/><br/>
           <label>Password<br/>
-            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} style={{width:"100%"}} />
+            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} style={{ width: "100%" }} />
           </label>
           <br/><br/>
           <div style={{ display:"flex", gap:8 }}>
@@ -72,7 +96,15 @@ export default function App() {
             <button onClick={logout}>Logout</button>
           </div>
           <hr/>
-          <OnboardingWizard token={token} /> {/* <-- show wizard */}
+
+          {checking ? (
+            <p>Loading your preferences…</p>
+          ) : showWizard ? (
+            <OnboardingWizard token={token} onComplete={() => setShowWizard(false)} />
+          ) : (
+            <Dashboard token={token} />
+          )}
+
           <p>{msg}</p>
         </>
       )}

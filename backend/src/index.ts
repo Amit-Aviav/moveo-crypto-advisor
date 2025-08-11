@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 import { prisma } from './utils/prisma'; 
 import authRoutes from "./routes/auth";
 import preferencesRoutes from './routes/preferences';
-
+import dashboardRoutes from "./routes/dashboard";
+import votesRoutes from "./routes/votes";
 
 
 // Load environment variables
@@ -22,6 +23,9 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/preferences', preferencesRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/votes', votesRoutes);
+
 
 // Health check
 app.get('/health', (_req, res) => {
