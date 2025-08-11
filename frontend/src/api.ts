@@ -1,7 +1,6 @@
 // frontend/src/api.ts
 const API = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
-type Json = Record<string, unknown>;
 
 async function request<T = any>(
   path: string,
