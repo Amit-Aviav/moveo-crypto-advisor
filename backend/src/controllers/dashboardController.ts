@@ -17,10 +17,29 @@ const FALLBACK_NEWS = [
   { id: "n2", title: "ETH dev update: progress on scaling", url: "https://example.com/ethscaling", source: "Static" },
 ];
 
-const FALLBACK_MEMES = [
-  { id: "m1", text: "WAGMI 🚀 (but set stop-loss)", image: null as string | null },
-  { id: "m2", text: "HODL strategy: do nothing, but with conviction.", image: null },
-];
+function memegen(top: string, bottom: string, template = "doge") {
+    const enc = (s: string) => encodeURIComponent(s.replace(/ /g, "_"));
+    return `https://api.memegen.link/images/${template}/${enc(top)}/${enc(bottom)}.png?font=impact`;
+  }
+  
+  // Replace your current FALLBACK_MEMES with this:
+  const FALLBACK_MEMES = [
+    {
+      id: "m1",
+      text: "WAGMI 🚀 (but set stop-loss)",
+      image: memegen("WAGMI 🚀", "but set stop-loss", "doge"),
+    },
+    {
+      id: "m2",
+      text: "HODL strategy: do nothing, but with conviction.",
+      image: memegen("HODL", "with conviction", "stonks"),
+    },
+    {
+      id: "m3",
+      text: "FOMO is not a strategy.",
+      image: memegen("FOMO", "is not a strategy", "gru"),
+    },
+  ];
 
 function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)] }
 
@@ -35,6 +54,8 @@ export async function getDashboard(req: AuthedRequest, res: Response) {
     const wantsCharts = (prefs?.contentTypes ?? []).includes("charts");
     const wantsSocial = (prefs?.contentTypes ?? []).includes("social");
     const wantsFun = (prefs?.contentTypes ?? []).includes("fun") || true; // show by default
+
+   
 
     // 2) prices (CoinGecko, no key required)
     const ids = assets.map(s => CG_IDS[s]).filter(Boolean);
@@ -101,4 +122,5 @@ export async function getDashboard(req: AuthedRequest, res: Response) {
     return res.status(500).json({ ok: false, error: "Failed to build dashboard" });
   }
 }
+
 export default getDashboard;
