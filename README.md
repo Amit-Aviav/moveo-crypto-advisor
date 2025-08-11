@@ -3,7 +3,7 @@
 A personalized crypto investor dashboard. The app onboards the user with a short quiz and then shows a daily dashboard tailored to their preferences. Users can upvote/downvote items to improve future recommendations. A fun meme is also shown each day.
 
 ## Live URLs
-- **Backend (Railway):** moveo-crypto-advisor-production.up.railway.app
+- **Backend (Railway):** https://moveo-crypto-advisor-production.up.railway.app/
 - **Frontend (Netlify/Vercel):** https://YOUR-FRONTEND.app
 
 ## Features
