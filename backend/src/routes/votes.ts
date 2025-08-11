@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth";
-import { myVotes, upsertVote } from "../controllers/votesController";
+import { upsertVote, myVotes } from "../controllers/votesController";
 
 const router = Router();
 
-router.get("/me", requireAuth, myVotes);  // GET /api/votes/me
-router.post("/", requireAuth, upsertVote); // POST /api/votes
+router.post("/", requireAuth, upsertVote);        // upsert a vote
+router.get("/me", requireAuth, myVotes);          // (optional) list my votes
+router.post("/summary", requireAuth); // totals for items
 
 export default router;
