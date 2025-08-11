@@ -1,5 +1,7 @@
+// frontend/src/components/Dashboard.tsx
 import { useEffect, useState } from "react";
-import { getDashboard } from "../api";
+import type { CSSProperties } from "react";
+import { getDashboard, vote } from "../api";
 
 type Sections = {
   prices?: Array<{ symbol: string; name?: string; usd?: number }>;
@@ -46,6 +48,32 @@ export default function Dashboard({ token }: { token: string }) {
     return () => { alive = false; };
   }, [token]);
 
+  // ---------- voting helpers ----------
+  function VoteButtons({ onVote }: { onVote: (v: 1 | -1) => void }) {
+    const btn: CSSProperties = {
+      cursor: "pointer",
+      border: "1px solid #e5e7eb",
+      borderRadius: 8,
+      padding: "2px 8px",
+      marginLeft: 6,
+    };
+    return (
+      <span>
+        <button style={btn} onClick={() => onVote(1)} aria-label="upvote">👍</button>
+        <button style={btn} onClick={() => onVote(-1)} aria-label="downvote">👎</button>
+      </span>
+    );
+  }
+
+  const sendVote = async (
+    type: "news" | "price" | "insight" | "meme",
+    itemId: string,
+    value: 1 | -1
+  ) => {
+    try { await vote(token, { type, itemId, value }); } catch {}
+  };
+  // ------------------------------------
+
   if (loading) return <p>Loading dashboard…</p>;
   if (err) return <p style={{ color: "crimson" }}>{err}</p>;
   if (!data) return <p>No data.</p>;
@@ -61,6 +89,7 @@ export default function Dashboard({ token }: { token: string }) {
               <li key={p.symbol}>
                 <strong>{p.symbol}</strong>{" "}
                 <span style={styles.muted}>({p.name})</span>: {fmtUSD(p.usd)}
+                <VoteButtons onVote={(v) => sendVote("price", p.symbol, v)} />
               </li>
             ))
           ) : (
@@ -78,6 +107,7 @@ export default function Dashboard({ token }: { token: string }) {
               <li key={n.id}>
                 <a href={n.url} target="_blank" rel="noreferrer">{n.title}</a>{" "}
                 {n.source ? <span style={styles.muted}>({n.source})</span> : null}
+                <VoteButtons onVote={(v) => sendVote("news", n.id, v)} />
               </li>
             ))
           ) : (
@@ -88,30 +118,33 @@ export default function Dashboard({ token }: { token: string }) {
 
       {/* Insight */}
       <section style={styles.card}>
-        <h3>AI Insight of the Day</h3>
+        <h3>
+          AI Insight of the Day
+          <VoteButtons onVote={(v) => sendVote("insight", data.insight?.id ?? "insight", v)} />
+        </h3>
         <pre style={styles.pre}>{data.insight?.text || "—"}</pre>
       </section>
 
       {/* Meme */}
-        <section style={{ ...styles.card, overflow: "hidden" }}>
-        <h3>Fun Crypto Meme</h3>
+      <section style={{ ...styles.card, overflow: "hidden" }}>
+        <h3>
+          Fun Crypto Meme
+          {data.meme && <VoteButtons onVote={(v) => sendVote("meme", data.meme!.id, v)} />}
+        </h3>
         {data.meme ? (
-            data.meme.image ? (
+          data.meme.image ? (
             <img
-                src={data.meme.image}
-                alt="meme"
-                style={{ width: "100%", height: "auto", display: "block", borderRadius: 8 }}
+              src={data.meme.image}
+              alt="meme"
+              style={{ width: "100%", height: "auto", display: "block", borderRadius: 8 }}
             />
-            ) : (
+          ) : (
             <p style={{ margin: 0 }}>{data.meme.text}</p>
-            )
+          )
         ) : (
-            <p style={{ ...styles.muted, margin: 0 }}>No meme today 😅</p>
+          <p style={{ ...styles.muted, margin: 0 }}>No meme today 😅</p>
         )}
-</section>
-
+      </section>
     </div>
-
-    
   );
 }

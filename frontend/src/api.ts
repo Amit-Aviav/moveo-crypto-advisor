@@ -56,6 +56,7 @@ export async function getDashboard(token: string) {
     });
   }
   
+  
 export async function savePrefs(
   token: string,
   body: { investorType: string; assets: string[]; contentTypes: string[] }
@@ -69,3 +70,14 @@ export async function savePrefs(
     }
   );
 }
+export async function vote(
+    token: string,
+    body: { type: "news" | "price" | "insight" | "meme"; itemId: string; value: 1 | -1 }
+  ) {
+    return request<{ ok: boolean }>("/api/votes", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+  }
+  
