@@ -43,9 +43,9 @@ Votes are stored per user in the DB (`Vote` model). Totals endpoint exists
 - **Deploy:** Railway (backend), Netlify/Vercel (frontend)
 
 ## Bonus / Future work
-- **LLM Insight**: replace rule-based insight with a free LLM (OpenRouter / HF Inference) using user assets + content types as context.
 - **Vote totals & highlighting**: show ↑ / ↓ counts and tint my current vote; add optimistic updates.
-- **News sources**: plug real CryptoPanic (set `CRYPTOPANIC_TOKEN`) and add filters by selected assets.
+- Store user votes per item to build a feedback dataset:
+    Schema: { userId, type, itemId, value, timestamp }
+    Aggregate by {type,itemId} for popularity; per-user embeddings can personalize.
 - **Charts**: if user chose “Charts”, embed simple sparkline or link to TradingView per asset.
-- **Error tolerance**: graceful backoffs when third-party APIs rate-limit.
 
